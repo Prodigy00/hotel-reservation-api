@@ -39,8 +39,9 @@ func main() {
 
 	v1 := app.Group("/api/v1")
 
-	v1.Get("/user", userHandler.HandleGetUsers)
-	v1.Get("/user/:id", userHandler.HandleGetUser)
+	v1.Get("/users", userHandler.HandleGetUsers)
+	v1.Get("/users/:id", userHandler.HandleGetUser)
+	v1.Post("/users", userHandler.HandleCreateUser)
 
 	app.Listen(*listenAddr)
 }
