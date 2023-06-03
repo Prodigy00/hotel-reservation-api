@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"github.com/prodigy00/hotel-reservation-api/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,6 +17,8 @@ type UserStore interface {
 	GetUser(context.Context, string) (*types.User, error)
 	GetUsers(context.Context) ([]*types.User, error)
 	CreateUser(context.Context, *types.User) (*types.User, error)
+	//UpdateUser(context.Context, *types.User) (*types.User, error)
+	DeleteUser(context.Context, string) error
 }
 
 type MongoUserStore struct {
@@ -31,7 +34,7 @@ func NewMongoUserStore(client *mongo.Client) *MongoUserStore {
 }
 
 func (s *MongoUserStore) GetUser(ctx context.Context, id string) (*types.User, error) {
-	oid, err := primitive.ObjectIDFromHex(id)
+	oid, err := toObjectId(id)
 	if err != nil {
 		return nil, err
 	}
@@ -66,4 +69,26 @@ func (s *MongoUserStore) CreateUser(ctx context.Context, user *types.User) (*typ
 	}
 	user.ID = res.InsertedID.(primitive.ObjectID)
 	return user, nil
+}
+
+func (s *MongoUserStore) DeleteUser(ctx context.Context, id string) error {
+	oid, err := toObjectId(id)
+	if err != nil {
+		return err
+	}
+
+	res, err := s.coll.DeleteOne(ctx, bson.M{"_id": oid})
+	if err != nil {
+		return err
+	}
+
+	if res.DeletedCount == 0 {
+		return errors.New("error occurred while deleting user")
+	}
+
+	return nil
+}
+
+func toObjectId(id string) (primitive.ObjectID, error) {
+	return primitive.ObjectIDFromHex(id)
 }

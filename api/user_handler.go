@@ -57,3 +57,17 @@ func (h *UserHandler) HandleCreateUser(c *fiber.Ctx) error {
 	}
 	return c.JSON(createdUser)
 }
+
+func (h *UserHandler) HandleUpdateUser(c *fiber.Ctx) error {
+	return nil
+}
+
+func (h *UserHandler) HandleDeleteUser(c *fiber.Ctx) error {
+	userId := c.Params("id")
+
+	if err := h.userStore.DeleteUser(c.Context(), userId); err != nil {
+		return err
+	}
+
+	return c.JSON(map[string]string{"status": "OK"})
+}
