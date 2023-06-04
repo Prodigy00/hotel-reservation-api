@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/prodigy00/hotel-reservation-api/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -13,12 +14,18 @@ const (
 	userColl = "users"
 )
 
+type Dropper interface {
+	Drop(context.Context) error
+}
+
 type UserStore interface {
 	GetUser(context.Context, string) (*types.User, error)
 	GetUsers(context.Context) ([]*types.User, error)
 	CreateUser(context.Context, *types.User) (*types.User, error)
 	UpdateUser(ctx context.Context, filter bson.M, update types.UpdateUserParams) error
 	DeleteUser(context.Context, string) error
+
+	Dropper
 }
 
 type MongoUserStore struct {
@@ -26,11 +33,16 @@ type MongoUserStore struct {
 	coll   *mongo.Collection
 }
 
-func NewMongoUserStore(client *mongo.Client) *MongoUserStore {
+func NewMongoUserStore(client *mongo.Client, dbname string) *MongoUserStore {
 	return &MongoUserStore{
 		client: client,
-		coll:   client.Database(DbName).Collection(userColl),
+		coll:   client.Database(dbname).Collection(userColl),
 	}
+}
+
+func (s *MongoUserStore) Drop(ctx context.Context) error {
+	fmt.Println("--- dropping user collection ---")
+	return s.coll.Drop(ctx)
 }
 
 func (s *MongoUserStore) GetUser(ctx context.Context, id string) (*types.User, error) {
