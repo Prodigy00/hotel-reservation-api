@@ -1,38 +1,42 @@
 package api
 
 import (
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/prodigy00/hotel-reservation-api/db"
 )
 
 type HotelHandler struct {
-	hotelStore db.HotelStore
-	roomStore  db.RoomStore
+	store *db.Store
 }
 
-func NewHotelHandler(hs db.HotelStore, rs db.RoomStore) *HotelHandler {
+func NewHotelHandler(store *db.Store) *HotelHandler {
 	return &HotelHandler{
-		hotelStore: hs,
-		roomStore:  rs,
+		store: store,
 	}
-}
-
-type HotelQueryParams struct {
-	Rooms  bool
-	Rating int
 }
 
 func (h *HotelHandler) HandleGetHotels(c *fiber.Ctx) error {
-	var qparams HotelQueryParams
-	if err := c.QueryParser(&qparams); err != nil {
-		return err
-	}
-	fmt.Println(qparams)
-
-	hotels, err := h.hotelStore.GetHotels(c.Context(), nil)
+	hotels, err := h.store.Hotel.GetHotels(c.Context(), nil)
 	if err != nil {
 		return err
 	}
 	return c.JSON(hotels)
+}
+
+func (h *HotelHandler) HandleGetHotel(c *fiber.Ctx) error {
+	id := c.Params("id")
+	hotel, err := h.store.Hotel.GetHotel(c.Context(), id)
+	if err != nil {
+		return err
+	}
+	return c.JSON(hotel)
+}
+
+func (h *HotelHandler) HandleGetRooms(c *fiber.Ctx) error {
+	id := c.Params("id")
+	rooms, err := h.store.Room.GetRooms(c.Context(), id)
+	if err != nil {
+		return err
+	}
+	return c.JSON(rooms)
 }

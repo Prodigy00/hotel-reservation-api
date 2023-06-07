@@ -33,10 +33,10 @@ type MongoUserStore struct {
 	coll   *mongo.Collection
 }
 
-func NewMongoUserStore(client *mongo.Client, dbname string) *MongoUserStore {
+func NewMongoUserStore(client *mongo.Client) *MongoUserStore {
 	return &MongoUserStore{
 		client: client,
-		coll:   client.Database(dbname).Collection(userColl),
+		coll:   client.Database(DbName).Collection(userColl),
 	}
 }
 
@@ -46,7 +46,7 @@ func (s *MongoUserStore) Drop(ctx context.Context) error {
 }
 
 func (s *MongoUserStore) GetUser(ctx context.Context, id string) (*types.User, error) {
-	oid, err := toObjectId(id)
+	oid, err := ToObjectId(id)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (s *MongoUserStore) UpdateUser(ctx context.Context, filter bson.M, params t
 }
 
 func (s *MongoUserStore) DeleteUser(ctx context.Context, id string) error {
-	oid, err := toObjectId(id)
+	oid, err := ToObjectId(id)
 	if err != nil {
 		return err
 	}
@@ -112,8 +112,4 @@ func (s *MongoUserStore) DeleteUser(ctx context.Context, id string) error {
 	}
 
 	return nil
-}
-
-func toObjectId(id string) (primitive.ObjectID, error) {
-	return primitive.ObjectIDFromHex(id)
 }

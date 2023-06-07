@@ -14,6 +14,7 @@ const (
 
 type RoomStore interface {
 	CreateRoom(context.Context, *types.Room) (*types.Room, error)
+	GetRooms(context.Context, string) ([]*types.Room, error)
 }
 
 type MongoRoomStore struct {
@@ -44,4 +45,25 @@ func (s *MongoRoomStore) CreateRoom(ctx context.Context, room *types.Room) (*typ
 		return nil, err
 	}
 	return room, nil
+}
+
+func (s *MongoRoomStore) GetRooms(ctx context.Context, id string) ([]*types.Room, error) {
+	oid, err := ToObjectId(id)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.M{"hotelID": oid}
+
+	res, err := s.coll.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var rooms []*types.Room
+	if err := res.All(ctx, &rooms); err != nil {
+		return nil, err
+	}
+
+	return rooms, nil
 }
