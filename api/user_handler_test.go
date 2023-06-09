@@ -20,6 +20,7 @@ const (
 
 type testdb struct {
 	db.UserStore
+	*db.Store
 }
 
 func (tdb *testdb) teardown(t *testing.T) {
@@ -35,7 +36,7 @@ func setup(t *testing.T) *testdb {
 	}
 
 	return &testdb{
-		UserStore: db.NewMongoUserStore(client, db.TestDbName),
+		UserStore: db.NewMongoUserStore(client),
 	}
 }
 
@@ -44,7 +45,7 @@ func TestUserHandler_HandleCreateUser(t *testing.T) {
 	defer tdb.teardown(t)
 
 	app := fiber.New()
-	userHandler := NewUserHandler(tdb.UserStore)
+	userHandler := NewUserHandler(tdb.Store)
 	app.Post("/", userHandler.HandleCreateUser)
 
 	params := types.CreateUserParams{
