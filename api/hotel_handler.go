@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/prodigy00/hotel-reservation-api/db"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type HotelHandler struct {
@@ -34,7 +35,12 @@ func (h *HotelHandler) HandleGetHotel(c *fiber.Ctx) error {
 
 func (h *HotelHandler) HandleGetRooms(c *fiber.Ctx) error {
 	id := c.Params("id")
-	rooms, err := h.store.Room.GetRooms(c.Context(), id)
+	oid, err := db.ToObjectId(id)
+	if err != nil {
+		return err
+	}
+	filter := bson.M{"hotelID": oid}
+	rooms, err := h.store.Room.GetRooms(c.Context(), filter)
 	if err != nil {
 		return err
 	}

@@ -28,7 +28,7 @@ func JWTAuthentication(userStore db.UserStore) fiber.Handler {
 		}
 
 		userID := claims["id"].(string)
-		fmt.Println(userID)
+
 		user, err := userStore.GetUser(c.Context(), userID)
 		if err != nil {
 			fmt.Println(err)
