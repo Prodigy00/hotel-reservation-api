@@ -38,13 +38,15 @@ func main() {
 			User:    userStore,
 			Booking: bookingStore,
 		}
-		hotelHandler = api.NewHotelHandler(store)
-		userHandler  = api.NewUserHandler(store)
-		authHandler  = api.NewAuthHandler(userStore)
-		roomHandler  = api.NewRoomHandler(store)
-		app          = fiber.New(errConfig)
-		auth         = app.Group("/api")
-		v1           = app.Group("/api/v1", middleware.JWTAuthentication(userStore))
+		hotelHandler   = api.NewHotelHandler(store)
+		userHandler    = api.NewUserHandler(store)
+		authHandler    = api.NewAuthHandler(userStore)
+		roomHandler    = api.NewRoomHandler(store)
+		bookingHandler = api.NewBookingsHandler(store)
+		app            = fiber.New(errConfig)
+		auth           = app.Group("/api")
+		v1             = app.Group("/api/v1", middleware.JWTAuthentication(userStore))
+		admin          = v1.Group("/admin", middleware.AdminAuth)
 	)
 
 	app.Get("/", handleHello)
@@ -65,8 +67,16 @@ func main() {
 	v1.Get("/hotels/:id/rooms", hotelHandler.HandleGetRooms)
 	v1.Get("/hotels/:id", hotelHandler.HandleGetHotel)
 
+	//rooms
 	v1.Get("/rooms", roomHandler.HandleGetRooms)
 	v1.Post("/rooms/:id/book", roomHandler.HandleBookRoom)
+	//cancel a booking
+
+	//bookings
+	admin.Get("/bookings", bookingHandler.HandleGetBookings)
+	v1.Get("/bookings/:id", bookingHandler.HandleGetBooking)
+	v1.Get("/bookings/:id/cancel", bookingHandler.HandleCancelBooking)
+
 	app.Listen(*listenAddr)
 }
 

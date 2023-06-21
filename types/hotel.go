@@ -10,15 +10,6 @@ type Hotel struct {
 	Rating   int                  `bson:"rating" json:"rating"`
 }
 
-type RoomType int
-
-const (
-	SingleRoomType RoomType = iota + 1
-	DoubleRoomType
-	SeaSideRoomType
-	DeluxeRoomType
-)
-
 type Room struct {
 	ID      primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	Size    string             `bson:"size" json:"size"`
